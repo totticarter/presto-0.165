@@ -243,6 +243,7 @@ public class LocalExecutionPlanner
     private final DataSize maxPagePartitioningBufferSize;
     private final SpillerFactory spillerFactory;
     private final BlockEncodingSerde blockEncodingSerde;
+    private final boolean codegen = true;
 
     @Inject
     public LocalExecutionPlanner(
@@ -1035,42 +1036,45 @@ public class LocalExecutionPlanner
                     .map(expression -> toRowExpression(expression, expressionTypes))
                     .collect(toImmutableList());
 
-            try {
-                if (columns != null) {
-                    Supplier<CursorProcessor> cursorProcessor = expressionCompiler.compileCursorProcessor(translatedFilter, translatedProjections, sourceNode.getId());
-                    Supplier<PageProcessor> pageProcessor = expressionCompiler.compilePageProcessor(translatedFilter, translatedProjections);
+            if(codegen){
 
-                    SourceOperatorFactory operatorFactory = new ScanFilterAndProjectOperator.ScanFilterAndProjectOperatorFactory(
-                            context.getNextOperatorId(),
-                            planNodeId,
-                            sourceNode.getId(),
-                            pageSourceProvider,
-                            cursorProcessor,
-                            pageProcessor,
-                            columns,
-                            Lists.transform(rewrittenProjections, forMap(expressionTypes)));
+                try {
+                    if (columns != null) {
+                        Supplier<CursorProcessor> cursorProcessor = expressionCompiler.compileCursorProcessor(translatedFilter, translatedProjections, sourceNode.getId());
+                        Supplier<PageProcessor> pageProcessor = expressionCompiler.compilePageProcessor(translatedFilter, translatedProjections);
 
-                    return new PhysicalOperation(operatorFactory, outputMappings);
+                        SourceOperatorFactory operatorFactory = new ScanFilterAndProjectOperator.ScanFilterAndProjectOperatorFactory(
+                                context.getNextOperatorId(),
+                                planNodeId,
+                                sourceNode.getId(),
+                                pageSourceProvider,
+                                cursorProcessor,
+                                pageProcessor,
+                                columns,
+                                Lists.transform(rewrittenProjections, forMap(expressionTypes)));
+
+                        return new PhysicalOperation(operatorFactory, outputMappings);
+                    }
+                    else {
+                        Supplier<PageProcessor> processor = expressionCompiler.compilePageProcessor(translatedFilter, translatedProjections);
+
+                        OperatorFactory operatorFactory = new FilterAndProjectOperator.FilterAndProjectOperatorFactory(
+                                context.getNextOperatorId(),
+                                planNodeId,
+                                processor,
+                                Lists.transform(rewrittenProjections, forMap(expressionTypes)));
+
+                        return new PhysicalOperation(operatorFactory, outputMappings, source);
+                    }
                 }
-                else {
-                    Supplier<PageProcessor> processor = expressionCompiler.compilePageProcessor(translatedFilter, translatedProjections);
+                catch (RuntimeException e) {
+                    if (!interpreterEnabled) {
+                        throw new PrestoException(COMPILER_ERROR, "Compiler failed and interpreter is disabled", e);
+                    }
 
-                    OperatorFactory operatorFactory = new FilterAndProjectOperator.FilterAndProjectOperatorFactory(
-                            context.getNextOperatorId(),
-                            planNodeId,
-                            processor,
-                            Lists.transform(rewrittenProjections, forMap(expressionTypes)));
-
-                    return new PhysicalOperation(operatorFactory, outputMappings, source);
+                    // compilation failed, use interpreter
+                    log.error(e, "Compile failed for filter=%s projections=%s sourceTypes=%s error=%s", filterExpression, assignments, sourceTypes, e);
                 }
-            }
-            catch (RuntimeException e) {
-                if (!interpreterEnabled) {
-                    throw new PrestoException(COMPILER_ERROR, "Compiler failed and interpreter is disabled", e);
-                }
-
-                // compilation failed, use interpreter
-                log.error(e, "Compile failed for filter=%s projections=%s sourceTypes=%s error=%s", filterExpression, assignments, sourceTypes, e);
             }
 
             FilterFunction filterFunction;

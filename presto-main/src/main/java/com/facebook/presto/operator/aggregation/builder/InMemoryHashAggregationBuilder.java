@@ -114,6 +114,7 @@ public class InMemoryHashAggregationBuilder
     @Override
     public void close()
     {
+
     }
 
     @Override

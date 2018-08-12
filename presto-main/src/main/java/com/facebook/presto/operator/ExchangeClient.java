@@ -135,6 +135,7 @@ public class ExchangeClient
             return;
         }
         checkState(!noMoreLocations, "No more locations already set");
+        System.out.println("====debug====addlocation: " + location.toString());
         locations.add(location);
         scheduleRequestIfNecessary();
     }

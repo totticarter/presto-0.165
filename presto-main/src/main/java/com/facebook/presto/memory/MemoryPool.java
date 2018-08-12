@@ -85,6 +85,8 @@ public class MemoryPool
             return future;
         }
         return NOT_BLOCKED;
+//        future = SettableFuture.create();
+//        return future;
     }
 
     /**

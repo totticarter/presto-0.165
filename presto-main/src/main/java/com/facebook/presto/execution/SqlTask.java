@@ -293,6 +293,11 @@ public class SqlTask
             // output buffer must be established before drivers are created (e.g.
             // a VALUES query).
             outputBuffer.setOutputBuffers(outputBuffers);
+            System.out.println("====debug==== fragment is: " + fragment.toString() + ", taskid: " + this.taskId.toString());
+            int count = 0;
+            for(TaskSource taskSource : sources){
+                System.out.println("====debug==== taskSource is: " + (count++) + ", " + taskSource.toString() + ", taskid: " + this.taskId.toString());
+            }
 
             // assure the task execution is only created once
             SqlTaskExecution taskExecution;
@@ -325,6 +330,7 @@ public class SqlTask
 
         return getTaskInfo();
     }
+
 
     public CompletableFuture<BufferResult> getTaskResults(OutputBufferId bufferId, long startingSequenceId, DataSize maxSize)
     {

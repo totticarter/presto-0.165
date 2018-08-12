@@ -190,7 +190,9 @@ public class Driver
         // stage the new updates
         while (true) {
             // attempt to update directly to the new source
+//            System.out.println("before===========updateSource==========newSources size is: " + newSources.size() + ", " +  newSources.toString());
             TaskSource currentNewSource = newSources.putIfAbsent(source.getPlanNodeId(), source);
+//            System.out.println("after===========updateSource==========newSources size is: " + newSources.size() + ", " +  newSources.toString());
 
             // if update succeeded, just break
             if (currentNewSource == null) {

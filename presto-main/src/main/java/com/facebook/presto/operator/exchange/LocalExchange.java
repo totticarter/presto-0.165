@@ -111,6 +111,7 @@ public class LocalExchange
         }
         this.sources = sources.build();
 
+        System.out.println("=====debug=====this.sources size is: " + this.sources.size());
         List<Consumer<PageReference>> buffers = this.sources.stream()
                 .map(buffer -> (Consumer<PageReference>) buffer::addPage)
                 .collect(toImmutableList());
@@ -199,6 +200,7 @@ public class LocalExchange
             // Note: exchanger can be stateful so create a new one for each sink
             Consumer<Page> exchanger = exchangerSupplier.get();
             LocalExchangeSink sink = new LocalExchangeSink(types, exchanger, memoryManager, this::sinkFinished);
+            System.out.println("====debug==== sinks size is: " + sinks.size());
             sinks.add(sink);
             return sink;
         }

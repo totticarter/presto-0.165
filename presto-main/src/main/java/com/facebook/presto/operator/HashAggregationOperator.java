@@ -408,6 +408,7 @@ public class HashAggregationOperator
                 if (!inputProcessed && !step.isOutputPartial()) {
                     // global aggregations always generate an output row with the default aggregation output (e.g. 0 for COUNT, NULL for SUM)
                     finished = true;
+                    System.out.println("====debug====HashAggregationOperator: get final output " + step);
                     return getGlobalAggregationOutput();
                 }
 

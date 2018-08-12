@@ -384,7 +384,7 @@ public class TaskExecutor
             return taskThreadUsageNanos;
         }
 
-        private TaskId getTaskId()
+        public TaskId getTaskId()
         {
             return taskId;
         }

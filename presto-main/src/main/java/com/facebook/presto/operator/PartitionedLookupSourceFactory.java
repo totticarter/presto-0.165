@@ -96,6 +96,7 @@ public final class PartitionedLookupSourceFactory
 
         SettableFuture<LookupSource> lookupSourceFuture = SettableFuture.create();
         lookupSourceFutures.add(lookupSourceFuture);
+        System.out.println("====debug====lookupSourceFutures size is: " + lookupSourceFutures.size());
         return lookupSourceFuture;
     }
 

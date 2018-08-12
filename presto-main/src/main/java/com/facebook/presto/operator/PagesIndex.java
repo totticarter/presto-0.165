@@ -129,6 +129,7 @@ public class PagesIndex
 
         positionCount += page.getPositionCount();
 
+        System.out.println("====debug====channels 0 size is :" + channels[0].size());
         int pageIndex = (channels.length > 0) ? channels[0].size() : 0;
         for (int i = 0; i < channels.length; i++) {
             Block block = page.getBlock(i);
@@ -140,6 +141,7 @@ public class PagesIndex
             long sliceAddress = encodeSyntheticAddress(pageIndex, position);
             valueAddresses.add(sliceAddress);
         }
+        System.out.println("====debug====valueAddresses size is: " + valueAddresses.size());
 
         estimatedSize = calculateEstimatedSize();
     }

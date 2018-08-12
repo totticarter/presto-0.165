@@ -303,6 +303,7 @@ public final class HttpPageBufferClient
                         .setUri(uri).build(),
                 new PageResponseHandler());
 
+        System.out.println("====debug====GetResult url is: " + resultFuture.toString());
         future = resultFuture;
         Futures.addCallback(resultFuture, new FutureCallback<PagesResponse>()
         {

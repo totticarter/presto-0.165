@@ -26,9 +26,11 @@ import com.facebook.presto.operator.DriverFactory;
 import com.facebook.presto.operator.DriverStats;
 import com.facebook.presto.operator.PipelineContext;
 import com.facebook.presto.operator.TaskContext;
+import com.facebook.presto.spi.ConnectorSplit;
 import com.facebook.presto.sql.planner.LocalExecutionPlanner;
 import com.facebook.presto.sql.planner.LocalExecutionPlanner.LocalExecutionPlan;
 import com.facebook.presto.sql.planner.PlanFragment;
+import com.facebook.presto.sql.planner.plan.PlanNode;
 import com.facebook.presto.sql.planner.plan.PlanNodeId;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
@@ -187,6 +189,7 @@ public class SqlTaskExecution
             this.partitionedDriverFactories = partitionedDriverFactories.build();
             this.unpartitionedDriverFactories = unpartitionedDriverFactories.build();
             this.sourceStartOrder = new ArrayDeque<>(fragment.getPartitionedSources());
+            System.out.println("====debug==== SqlTaskExecution, sourceStartOrder size is: " + sourceStartOrder.size());
 
             checkArgument(this.partitionedDriverFactories.keySet().equals(ImmutableSet.copyOf(fragment.getPartitionedSources())),
                     "Fragment us partitioned, but all partitioned drivers were not found");
@@ -218,6 +221,7 @@ public class SqlTaskExecution
     {
         // start unpartitioned drivers
         List<DriverSplitRunner> runners = new ArrayList<>();
+        System.out.println("====debug==== SqlTaskExecution.start() unpartitionedDriverFactories size is: " + unpartitionedDriverFactories.size());
         for (DriverSplitRunnerFactory driverFactory : unpartitionedDriverFactories) {
             for (int i = 0; i < driverFactory.getDriverInstances().orElse(1); i++) {
                 runners.add(driverFactory.createDriverRunner(null, false));
@@ -277,6 +281,12 @@ public class SqlTaskExecution
 
         // first remove any split that was already acknowledged
         long currentMaxAcknowledgedSplit = this.maxAcknowledgedSplit;
+        System.out.println("====debug====maxAcknowledgedSplit is: " + maxAcknowledgedSplit + ", taskId is: " + this.taskId.toString());
+        for(TaskSource taskSource: sources){
+            for(ScheduledSplit scheduledSplit: taskSource.getSplits()){
+                System.out.println("====debug====SequenceId is: " + scheduledSplit.getSequenceId() + ", taskId is: " + this.taskId.toString());
+            }
+        }
         sources = sources.stream()
                 .map(source -> new TaskSource(
                         source.getPlanNodeId(),
@@ -288,6 +298,7 @@ public class SqlTaskExecution
 
         // update task with new sources
         for (TaskSource source : sources) {
+            System.out.println("====debug====PlanNodeId is: " + source.getPlanNodeId());
             if (partitionedDriverFactories.containsKey(source.getPlanNodeId())) {
                 schedulePartitionedSource(source);
             }
@@ -307,6 +318,14 @@ public class SqlTaskExecution
 
     private void schedulePartitionedSource(TaskSource source)
     {
+
+        if(source.getSplits().size() == 0){
+
+            System.out.println("====debug==== schedulePartitionedSource,partitioned source splits: " + source.getSplits().size() + ": " + taskHandle.getTaskId());
+        }else{
+            Set<ScheduledSplit> scheduledSplit = source.getSplits();
+            System.out.println("====debug==== schedulePartitionedSource,partitioned source splits: " + source.getSplits().size() + ", " + scheduledSplit.toString() + ": " + taskHandle.getTaskId());
+        }
         // if this is not for the currently scheduling source, save off the splits for
         // when the source is scheduled
         if (!isSchedulingSource(source.getPlanNodeId())) {
@@ -344,7 +363,20 @@ public class SqlTaskExecution
     private void scheduleUnpartitionedSource(TaskSource source, Map<PlanNodeId, TaskSource> updatedUnpartitionedSources)
     {
         // create new source
+        if(source.getSplits().size() == 0){
+
+            System.out.println("====debug====scheduleUnpartitionedSource, uppartitioned source splits: " + source.getSplits().size() + ": " + taskHandle.getTaskId());
+        }else{
+            Set<ScheduledSplit> scheduledSplits = source.getSplits();
+            for(ScheduledSplit scheduledSplit : scheduledSplits){
+
+                System.out.println("====debug=====scheduleUnpartitionedSourcem uppartitioned source splits: " + source.getSplits().size() + ", " + scheduledSplit.toString() + ": " + taskHandle.getTaskId());
+            }
+        }
         TaskSource newSource;
+        for(Entry<PlanNodeId, TaskSource> entry: unpartitionedSources.entrySet()){
+            System.out.println("====debug====plannodeid is: " + entry.getKey().toString() + ", TaskSource is: " + entry.getValue().toString() + ", taskid is: " + taskId.toString());
+        }
         TaskSource currentSource = unpartitionedSources.get(source.getPlanNodeId());
         if (currentSource == null) {
             newSource = source;
@@ -358,12 +390,16 @@ public class SqlTaskExecution
             unpartitionedSources.put(source.getPlanNodeId(), newSource);
             updatedUnpartitionedSources.put(source.getPlanNodeId(), newSource);
         }
+        for(Entry<PlanNodeId, TaskSource> entry: unpartitionedSources.entrySet()){
+            System.out.println("====debug====plannodeid is: " + entry.getKey().toString() + ", TaskSource is: " + entry.getValue().toString() + ", taskid is: " + taskId.toString());
+        }
     }
 
     private synchronized void enqueueDrivers(boolean forceRunSplit, List<DriverSplitRunner> runners)
     {
         // schedule driver to be executed
         List<ListenableFuture<?>> finishedFutures = taskExecutor.enqueueSplits(taskHandle, forceRunSplit, runners);
+        System.out.println("enqueueDrivers ====debug====" + runners.size());
         checkState(finishedFutures.size() == runners.size(), "Expected %s futures but got %s", runners.size(), finishedFutures.size());
 
         // record new driver
@@ -381,6 +417,7 @@ public class SqlTaskExecution
                     try (SetThreadName ignored = new SetThreadName("Task-%s", taskId)) {
                         // record driver is finished
                         remainingDrivers.decrementAndGet();
+                        System.out.println("====debug==== Split Future, remainingDrivers size: " + remainingDrivers.get());
 
                         checkTaskCompletion();
 
@@ -660,6 +697,7 @@ public class SqlTaskExecution
         public void stateChanged(TaskState newState)
         {
             if (newState.isDone()) {
+
                 System.out.println("=====debug==== taskHandle was removed");
                 taskExecutor.removeTask(taskHandle);
             }

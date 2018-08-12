@@ -38,10 +38,12 @@ public final class CompilerUtils
     private static final Logger log = Logger.get(CompilerUtils.class);
 
     private static final boolean ADD_FAKE_LINE_NUMBER = false;
+    //====debug liyong======
     private static final boolean DUMP_BYTE_CODE_TREE = true;
-    private static final boolean DUMP_BYTE_CODE_RAW = true;
+    private static final boolean DUMP_BYTE_CODE_RAW = false;
+
     private static final boolean RUN_ASM_VERIFIER = false; // verifier doesn't work right now
-    private static final AtomicReference<String> DUMP_CLASS_FILES_TO = new AtomicReference<>();
+    private static final AtomicReference<String> DUMP_CLASS_FILES_TO = new AtomicReference<>("/Users/liyong/software/xihe/genclass/unsafe");
     private static final AtomicLong CLASS_ID = new AtomicLong();
 
     private CompilerUtils()
@@ -111,6 +113,8 @@ public final class CompilerUtils
             catch (RuntimeException e) {
                 throw new CompilationException("Error compiling class " + classDefinition.getName(), e);
             }
+
+            //====debug liyong======
             try{
                 byte[] classbytes = cw.toByteArray();
                 FileOutputStream fos = new FileOutputStream(classDefinition.getName()+".class");

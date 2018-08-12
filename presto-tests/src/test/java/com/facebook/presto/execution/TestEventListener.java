@@ -166,6 +166,7 @@ public class TestEventListener
             queryCompletedEvents = ImmutableList.builder();
             splitCompletedEvents = ImmutableList.builder();
 
+            System.out.println("====debug==== numEvents is: " + numEvents);
             eventsLatch = new CountDownLatch(numEvents);
         }
 

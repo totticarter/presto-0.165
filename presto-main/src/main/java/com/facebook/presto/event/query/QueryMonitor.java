@@ -323,6 +323,7 @@ public class QueryMonitor
 
     private void splitCompletedEvent(TaskId taskId, DriverStats driverStats, @Nullable String failureType, @Nullable String failureMessage)
     {
+        System.out.println("====debug====failureMessage is: " + failureMessage);
         Optional<Duration> timeToStart = Optional.empty();
         if (driverStats.getStartTime() != null) {
             timeToStart = Optional.of(ofMillis(driverStats.getStartTime().getMillis() - driverStats.getCreateTime().getMillis()));

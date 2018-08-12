@@ -138,8 +138,8 @@ public class JoinProbeCompiler
         DynamicClassLoader classLoader = new DynamicClassLoader(joinProbeClass.getClassLoader());
 
         JoinProbeFactory joinProbeFactory;
-//        if (probeJoinChannel.isEmpty()) {
-        if(true){
+        if (probeJoinChannel.isEmpty()) {
+//        if(true){//enforce to use SimpleJoinProbe.SimpleJoinProbeFactory
             // see comment in PagesIndex#createLookupSource
             joinProbeFactory = new SimpleJoinProbe.SimpleJoinProbeFactory(types, probeOutputChannels, probeJoinChannel, probeHashChannel);
         }

@@ -954,6 +954,7 @@
                                         <ignore />
                                     </action>
                                 </pluginExecution>
+                                <!--
                                 <pluginExecution>
                                     <pluginExecutionFilter>
                                         <groupId>org.apache.maven.plugins</groupId>
@@ -967,6 +968,7 @@
                                         <ignore />
                                     </action>
                                 </pluginExecution>
+                                -->
                                 <pluginExecution>
                                     <pluginExecutionFilter>
                                         <groupId>io.takari.maven.plugins</groupId>
@@ -1041,7 +1043,7 @@
                             <goal>check</goal>
                         </goals>
                         <configuration>
-                            <skip>${air.check.skip-checkstyle}</skip>
+                            <skip>true</skip>
                             <failOnViolation>${air.check.fail-checkstyle}</failOnViolation>
                             <consoleOutput>true</consoleOutput>
                             <includeTestSourceDirectory>true</includeTestSourceDirectory>
