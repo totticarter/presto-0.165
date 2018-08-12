@@ -660,6 +660,7 @@ public class SqlTaskExecution
         public void stateChanged(TaskState newState)
         {
             if (newState.isDone()) {
+
                 System.out.println("=====debug==== taskHandle was removed");
                 taskExecutor.removeTask(taskHandle);
             }
