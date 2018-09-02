@@ -106,7 +106,8 @@
         <module>presto-jdbc</module>
         <module>presto-cli</module>
         <module>presto-benchmark-driver</module>
-        <!--<module>presto-server</module>
+        <module>presto-server</module>
+        <!--
         <module>presto-server-rpm</module>
         -->
         <module>presto-docs</module>
@@ -954,6 +955,7 @@
                                         <ignore />
                                     </action>
                                 </pluginExecution>
+                                <!--
                                 <pluginExecution>
                                     <pluginExecutionFilter>
                                         <groupId>org.apache.maven.plugins</groupId>
@@ -967,6 +969,7 @@
                                         <ignore />
                                     </action>
                                 </pluginExecution>
+                                -->
                                 <pluginExecution>
                                     <pluginExecutionFilter>
                                         <groupId>io.takari.maven.plugins</groupId>
@@ -1030,6 +1033,7 @@
                 </executions>
             </plugin>
 
+            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -1063,6 +1067,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            -->
 
             <plugin>
                 <groupId>io.takari.maven.plugins</groupId>
