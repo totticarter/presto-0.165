@@ -115,6 +115,10 @@ public final class CompilerUtils
             }
 
             //====debug liyong======
+            //commit one
+            //commit two
+            //commit three
+            //commit four
             try{
                 byte[] classbytes = cw.toByteArray();
                 FileOutputStream fos = new FileOutputStream(classDefinition.getName()+".class");
